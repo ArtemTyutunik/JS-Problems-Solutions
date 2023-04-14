@@ -26,7 +26,7 @@
         return {date: item.date};
     });
 
-    console.log(res);
+    // console.log(res);
 }
 
 
@@ -58,8 +58,8 @@
         return true;
     }
 
-    console.log(sameWords(arr));
-    console.log(sameWords(arr1))
+    // console.log(sameWords(arr));
+    // console.log(sameWords(arr1))
 }
 
 
@@ -78,18 +78,21 @@
 
 
 
-//is object function
+//is object a function
 
 {
     function isFunction(obj) {
         return Object.prototype.toString.call(obj) === '[object Function]'
     }
 
-    console.log(isFunction(function () {})) // true
+    //console.log(isFunction(function () {})) // true
 }
 
 
-function promiseAll(promises) {
+
+
+{
+    function promiseAll(promises) {
     return new Promise((resolve, reject) => {
         const results = [];
         let resolvedCount = 0;
@@ -109,25 +112,80 @@ function promiseAll(promises) {
         });
     });
 }
+    const fn = () => promiseAll([
+        new Promise((resolve) => {
+            setTimeout(() => resolve('foo'), 5000)
+        }),
 
-promiseAll([
-    new Promise((resolve) => {
-        setTimeout(() => resolve('foo'), 5000)
-    }),
+        new Promise((resolve, reject) => {
+            setTimeout(() => reject('bar'), 1000);
+        }),
 
-    new Promise((resolve, reject) => {
-        setTimeout(() => reject('bar'), 1000);
-    }),
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                Math.round(Math.random() * 10) % 2 === 0
+                    ? resolve('baz')
+                    : reject(new Error());
+            }, 300);
+        }),
+    ])
+        .then((res) => console.log('RESOLVED: ', res))
+        .catch((err) => console.log('REJECTED: ', err));
+}
 
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            Math.round(Math.random() * 10) % 2 === 0
-                ? resolve('baz')
-                : reject(new Error());
-        }, 300);
-    }),
-])
-    .then((res) => console.log('RESOLVED: ', res))
-    .catch((err) => console.log('REJECTED: ', err));
+function getTrackableObject(obj) {
+    if (obj[Symbol.for('isTracked')]) return obj;
+    const tracked = Array.isArray(obj) ? [] : {};
+    for (const key in obj) {
+        Object.defineProperty(tracked, key, {
+            configurable: true,
+            enumerable: true,
+            get() {
+                return obj[key];
+            },
+            set(value) {
+                if (typeof value === 'object') {
+                    value = getTrackableObject(value);
+                }
+                obj[key] = value;
+                console.log(`'${key}' has changed.`);
+            },
+        });
+    }
+    // marked as 'tracked'
+    Object.defineProperty(tracked, Symbol.for('isTracked'), {
+        configurable: false,
+        enumerable: false,
+        value: true,
+    });
+    return tracked;
+}
 
+// track app state
+const obj = { foo: 1 }
+const appState = getTrackableObject(obj);
+
+appState.foo = 1; // log `'foo' has changed.`
+
+{
+    function curry(fn) {
+
+        return function curried(...args){
+            if(args.length >= fn.length) {
+                return console.log('log')
+            } else {
+                return function(...args2){
+                    console.log(args)
+                    return curried.apply(this, args.concat(args2))
+                }
+            }
+        }
+    }
+    const join = (a, b, c) => {
+        return `${a}_${b}_${c}`
+    }
+
+    const curried = curry(join)
+    console.log(curried(1)(2)(3))
+}
 
