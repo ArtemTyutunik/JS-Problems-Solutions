@@ -1,0 +1,48 @@
+Essentially, the difference between useEffect and useLayoutEffect lies solely in when the two are fired.
+
+Processing effects:
+
+** Step 1. The user performs an action, i.e., clicking the button
+
+** Step 2. React updates the state internally
+
+** Step 3. React handles the DOM mutation
+
+** Step 4. The browser then paints this DOM change to the browser’s screen
+
+** Step 5. Only after the browser has painted the DOM change(s) is the useEffect function fired
+
+the function passed to useEffect will be fired only after the DOM changes are painted to the screen. Technically speaking, the effect function is fired asynchronously to not block the browser paint process.
+Although useEffect is deferred until after the browser has painted, it’s guaranteed to fire before any new renders. React will always flush a previous render’s effects before starting a new update.
+
+When there is more than one useEffect call within a component, the order of the effect calls is maintained.
+
+**Now**, how does this differ from the useLayoutEffect Hook? Unlike useEffect, the function passed to the useLayoutEffect Hook is fired synchronously after all DOM mutations.
+
+In simplified terms, useLayoutEffect doesn't really care whether the browser has painted the DOM changes or not. It triggers the function right after the DOM mutations are computed.
+
+[, javascript]
+----
+useEffect(() => {
+    console.log("USE EFFECT FUNCTION TRIGGERED");
+});
+useLayoutEffect(() => {
+    console.log("USE LAYOUT EFFECT FUNCTION TRIGGERED");
+});
+----
+Console:
+[javascript]
+----
+"USE LAYOUT EFFECT FUNCTION TRIGGERED"
+"USE EFFECT FUNCTION TRIGGERED"
+----
+
+The useLayoutEffect function is triggered synchronously before the DOM mutations are painted. However, the useEffect function is called after the DOM mutations are painted.
+
+Why does this difference in how heavy computations are handled matter? When possible, you should choose the useEffect Hook for cases where you want to be unobtrusive in the dealings of the browser paint process. In the real world, this is most of the time, except for when you’re reading layout from the DOM or doing something DOM-related that needs to be painted ASAP.
+
+
+
+
+
+
