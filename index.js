@@ -258,3 +258,36 @@
 
     //console.info(has(['o', 'a'], {o: {a: 2}}))
 }
+{
+//import Log from './modules/recursionLog.js'
+    //Log(['I', 'can', 'use', 'recursion'], 0)
+}
+
+
+
+{ // deep clone
+    const obj1 = {
+        a: {
+            b: {
+                c: 1
+            }
+        }
+    }
+
+    const createCopy = obj => {
+        let result = {}
+
+        for (const key in obj) {
+            if (typeof obj[key] === 'object') {
+                result[key] = createCopy(obj[key])
+            } else {
+                result[key] = obj[key]
+            }
+        }
+
+        return result
+    }
+
+    const copy = createCopy(obj1)
+    //console.log(obj1 === copy)
+}
